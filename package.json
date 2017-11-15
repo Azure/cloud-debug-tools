@@ -1,0 +1,18 @@
+{
+  "name": "cloud-debug-tools",
+  "version": "0.8.0",
+  "description": "collection of tools to support remote debugging on cloud services",
+  "bin": {
+    "dbgproxy": "./dbgproxy.js"
+  },
+  "dependencies": {
+    "websocket": "^1.0.25"
+  },
+  "devDependencies": {},
+  "author": "Microsoft Corporation",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Azure/cloud-debug-tools"
+  }
+}
