@@ -4,6 +4,7 @@ const { execSync } = require('child_process');
 const net = require('net');
 const path = require('path');
 const WebSocketClient = require('websocket').client;
+const DEBUG = typeof v8debug === 'object';
 const HTTP_PLATFORM_DEBUG_PORT = 8898;
 const VERSION = require('./package.json').version;
 
@@ -147,7 +148,9 @@ server.on('connection', function(socket) {
       });
 
       connection.on('message', function(message) {
-        console.log('[Download]', message.binaryData);
+        if (DEBUG) {
+          console.log('[Download]', message.binaryData);
+        }
         socket.write(message.binaryData);
       });
       socket.resume();
@@ -163,7 +166,9 @@ server.on('connection', function(socket) {
   }
 
   socket.on('data', function(data) {
-    console.log('[Upload]', data);
+    if (DEBUG) {
+      console.log('[Upload]', data);
+    }
     wsconnection.send(data);
   });
 
