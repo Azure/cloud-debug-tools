@@ -52,7 +52,9 @@ for (var i = 0; i < arrFunctionApps.length; i++) {
 }
 
 if (!objFunctionApps.hasOwnProperty(functionName.toLowerCase())) {
-  console.error(`ERROR: cannot find ${JSON.stringify(functionName)} under current subscription ${JSON.stringify(currentSubscription.name)}`)
+  console.error();
+  console.error(`ERROR: cannot find ${JSON.stringify(functionName)} under current subscription ${JSON.stringify(currentSubscription.name)}.`)
+  console.error('If you want to switch to another subscription, try "az account set".');
   process.exit(-1);
 }
 
@@ -83,7 +85,7 @@ if (!bRemoteDebugEnabled) {
   console.log(`done`);
 }
 
-console.log(`Remote debugging is now enabled on ${JSON.stringify(functionId)}`);
+console.log(`Remote debugging is enabled on ${JSON.stringify(functionId)}`);
 
 
 function help() {
@@ -97,8 +99,6 @@ function help() {
     '    dbgproxy my-function.azurewebsites.net 0.0.0.0:8898',
     '    dbgproxy my-function.azurewebsites.net 127.0.0.1:8898',
     '    dbgproxy my-function.azurewebsites.net localhost:8898',
-    '    dbgproxy my-function.azurewebsites.net ::1:8898',
-    '    dbgproxy my-function.azurewebsites.net 0:0:0:0:0:0:0:1:8898',
     '',
   ].join('\r\n'));
   console.log('dbgproxy@' + VERSION, path.resolve(__dirname, 'dbgproxy'));
@@ -121,12 +121,12 @@ function wscleanup() {
 
 server.on('connection', function(socket) {
   if (wsclient) {
-    console.log('[Server] client rejected', socket.remoteAddress + ':' + socket.remotePort);
+    console.log(`[Server] client rejected ${socket.remoteAddress}:${socket.remotePort}`);
 
     socket.destroy();
     return;
   } else {
-    console.log('[Server] client connected', socket.remoteAddress + ':' + socket.remotePort);
+    console.log(`[Server] client connected ${socket.remoteAddress}:${socket.remotePort}`);
     socket.pause();
 
     wsclient = new WebSocketClient();
@@ -173,7 +173,7 @@ server.on('connection', function(socket) {
   });
 
   socket.on('end', function() {
-    console.log('[Server] client disconnected', socket.remoteAddress + ':' + socket.remotePort);
+    console.log(`[Server] client disconnected ${socket.remoteAddress}:${socket.remotePort}`);
     wscleanup();
   });
 
@@ -185,7 +185,14 @@ server.on('connection', function(socket) {
 });
 
 server.on('listening', () => {
-  console.log('[Server] listening on', server.address().address + ':' + server.address().port);
+  var address = server.address().address;
+  var port = server.address().port;
+  console.log(`[Server] listening on ${address}:${port}`);
+  if (address === '0.0.0.0') {
+    address = '127.0.0.1';
+  }
+  console.log();
+  console.log(`Now you should be able to debug using "jdb -connect com.sun.jdi.SocketAttach:hostname=${address},port=${port}"`);
 });
 
 server.listen(options);
