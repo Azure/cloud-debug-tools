@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const { execSync } = require('child_process');
+const https = require('https');
 const net = require('net');
 const path = require('path');
 const WebSocketClient = require('websocket').client;
@@ -8,9 +9,56 @@ const DEBUG = typeof v8debug === 'object';
 const HTTP_PLATFORM_DEBUG_PORT = 8898;
 const VERSION = require('./package.json').version;
 
+if (Number(process.version.match(/^v(\d+)\./)[1]) < 8) {
+  console.error('ERROR: this application requires at least Node.js version 8, please install the LTS release from https://nodejs.org/en/download/.');
+  process.exit(-1);
+}
+
 function shell(cmdline) {
   var retval = execSync(cmdline, {stdio: [process.stdin, 'pipe', process.stderr]});
   return JSON.parse(retval);
+}
+
+function requestAsync(url, options) {
+  const { URL } = require('url');
+
+  if (!(url instanceof URL)) {
+    url = new URL(url);
+  }
+  options = options ? options : {};
+  options.host = url.host;
+  options.path = url.pathname + url.search;
+  if (url.port) {
+    options.port = url.port;
+  }
+  var func = null;
+  switch (url.protocol) {
+  case 'http:':
+    func = require('http');
+    break;
+  case 'https:':
+    func = require('https');
+    break;
+  }
+  return new Promise(function(resolve, reject) {
+    if (!func) {
+      return reject(new Error(`unsupported protocol ${url.protocol}`));
+    }
+    func.get(options, function(res) {
+      if (res.statusCode !== 200) {
+        return reject(new Error(`HTTP ${res.statusCode}`));
+      }
+      var data = null;
+      res.on('data', (chunk) => {
+        data = data ? data + chunk : chunk;
+      });
+      res.on('end', () => {
+        resolve(JSON.parse(data));
+      });
+    }).on('error', (err) => {
+      reject(err);
+    });
+  });
 }
 
 var argv = process.argv.slice(1);
@@ -87,6 +135,23 @@ if (!bRemoteDebugEnabled) {
 
 console.log(`Remote debugging is enabled on ${JSON.stringify(functionId)}`);
 
+(async function keepalive() {
+  try {
+    let accountAccessToken = shell(`az account get-access-token`).accessToken;
+    let functionAccessToken = await requestAsync(
+      `https://${functionName}.scm.azurewebsites.net/api/functions/admin/token`,
+      { headers: { 'Authorization': `Bearer ${accountAccessToken}` }});
+    let functionMasterKey = await requestAsync(
+      `https://${functionName}.azurewebsites.net/admin/host/systemkeys/_master`,
+      { headers : { 'Authorization': `Bearer ${functionAccessToken}` }});
+    let status = await requestAsync(
+      `https://${functionName}.azurewebsites.net/admin/host/status?code=${functionMasterKey.value}`);
+    console.log(`[Heartbeat] ${status.state}`);
+    setTimeout(keepalive, 60 * 1000 /* 60 seconds */);
+  } catch(ex) {
+    setTimeout(keepalive, 5 * 1000 /* 5 seconds */);
+  }
+})();
 
 function help() {
   console.log([
