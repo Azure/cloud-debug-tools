@@ -69,6 +69,10 @@ if (argv.length < 2 || argv.length > 3) {
 
 // TODO: need to consider global Azure vs. regional data centers and Edge
 var functionId = argv[1];
+if (!(functionId.match(new RegExp(/^((?:(?:(?:\w[\.\-\+]?)*)\w)+)((?:(?:(?:\w[\.\-\+]?){0,62})\w)+)\.(\w{2,6})$/)))) {
+  console.error(`ERROR: invalid domain name ${JSON.stringify(functionId)}.`);
+  process.exit(-1);
+}
 var idx = functionId.indexOf('.');
 var functionName = idx === -1 ? functionId : functionId.slice(0, idx);
 var options = {host: '127.0.0.1', port: 8898, backlog: 1};
