@@ -1,5 +1,39 @@
+# cloud-debug-tools
 
-# Contributing
+> A set of cross platform command line tools which provide support for cloud debugging and diagnostics.
+
+*Issues with the output should be reported on the <https://github.com/Azure/cloud-debug-tools/issues>.*
+
+
+## Supported Features
+* Java remote debugging for [Azure Functions](https://azure.microsoft.com/services/functions/) ([learn more](https://docs.microsoft.com/azure/azure-functions/functions-create-first-java-maven))
+
+## Install
+
+[Node.js](https://nodejs.org/) LTS version or higher is required.
+```
+$ npm install --global cloud-debug-tools
+```
+
+
+## Usage
+
+```
+Usage: dbgproxy <FQDN> [<binding host>:<port>]
+
+Sample:
+
+    dbgproxy my-function.azurewebsites.net
+    dbgproxy my-function.azurewebsites.net *:8000
+    dbgproxy my-function.azurewebsites.net 0.0.0.0:8898
+    dbgproxy my-function.azurewebsites.net 127.0.0.1:8898
+    dbgproxy my-function.azurewebsites.net localhost:8898
+
+dbgproxy@0.9.0 E:\Enlist\cloud-debug-tools\dbgproxy
+```
+
+## Contributing
+[MIT License](./LICENSE.txt)
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
