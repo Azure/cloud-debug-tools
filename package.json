@@ -1,6 +1,6 @@
 {
   "name": "cloud-debug-tools",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "collection of tools to support remote debugging on cloud services",
   "bin": {
     "dbgproxy": "./dbgproxy.js"
