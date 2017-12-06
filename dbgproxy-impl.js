@@ -93,6 +93,16 @@ if (argv.length === 3) {
 
 console.log(`Function App:                 ${JSON.stringify(functionId)}`);
 
+// check if Azure CLI has been installed
+try {
+  let output = execSync('az --version', {stdio: ['ignore', 'pipe', 'ignore']});
+} catch(ex) {
+  console.error();
+  console.error('ERROR: Cannot find az command.');
+  console.error('This tool requires Azure CLI, which can be installed from https://docs.microsoft.com/cli/azure/install-azure-cli.');
+  process.exit(-1);
+}
+
 process.stdout.write(`Subscription:                 `);
 var currentSubscription = shell('az account show');
 console.log(JSON.stringify(currentSubscription.name), `(ID = ${JSON.stringify(currentSubscription.id)})`);
@@ -105,7 +115,7 @@ for (var i = 0; i < arrFunctionApps.length; i++) {
 
 if (!objFunctionApps.hasOwnProperty(functionName.toLowerCase())) {
   console.error();
-  console.error(`ERROR: cannot find ${JSON.stringify(functionName)} under current subscription ${JSON.stringify(currentSubscription.name)}.`)
+  console.error(`ERROR: cannot find ${JSON.stringify(functionName)} under current subscription ${JSON.stringify(currentSubscription.name)}.`);
   console.error('If you want to switch to another subscription, try "az account set".');
   process.exit(-1);
 }
