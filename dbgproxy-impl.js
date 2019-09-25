@@ -15,7 +15,7 @@ if (Number(process.version.match(/^v(\d+)\./)[1]) < 8) {
 }
 
 function shell(cmdline) {
-  var retval = execSync(cmdline, {stdio: [process.stdin, 'pipe', process.stderr]});
+  var retval = execSync(cmdline + ' -o json', {stdio: [process.stdin, 'pipe', process.stderr]});
   return JSON.parse(retval);
 }
 
